@@ -1,0 +1,1245 @@
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL / RESET
+   ═══════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Lato", sans-serif;
+  background-color: #fbf1df;
+  color: #555252;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: "Lato", sans-serif;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: "Lato", sans-serif;
+  font-size: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHARED COMPONENTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Standard form input / textarea */
+.form-input {
+  display: block;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: "Lato", sans-serif;
+  box-sizing: border-box;
+}
+
+/* Small secondary button — "+ Add Ingredient", "+ Add Step" */
+.btn-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  background-color: #c8b58a;
+  border: 1px solid #8b7248;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #2c1a0e;
+  font-family: "Lato", sans-serif;
+}
+
+.btn-small img {
+  height: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT WRAPPER
+   ═══════════════════════════════════════════════════════════ */
+
+.app-wrapper {
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER & NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
+
+.site-header {
+  background-color: #8b8b6b;
+  padding: 0.75rem 2rem;
+  display: grid;
+  /* 1fr auto 1fr keeps the nav truly centered regardless of logo/login widths */
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.site-logo {
+  height: 50px;
+  width: 50px;
+  object-fit: contain;
+}
+
+.site-name {
+  font-family: "Dancing Script", cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #367070;
+  white-space: nowrap;
+}
+
+.site-nav {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-end;
+  align-self: end;
+  justify-content: flex-end;
+  margin-left: 5rem;
+}
+
+.nav-link {
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1f2937;
+  text-decoration: none;
+  padding-bottom: 3px;
+}
+
+/* Applied by TanStack Router activeProps when this route is active */
+.nav-link--active {
+  color: #c8543a;
+  border-bottom: 2px solid #c8543a;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  cursor: pointer;
+}
+
+.user-avatar {
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.login-text {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+/* The <main> element that wraps every page's content */
+.page-main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR  (shared by detail page and edit page)
+   ═══════════════════════════════════════════════════════════ */
+
+.sidebar-banner {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+/* Wraps search input + magnifier icon — needed for absolute icon positioning */
+.sidebar-search-wrap {
+  display: flex;
+  margin-bottom: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-search-input {
+  width: 100%;
+  padding: 0.45rem 2.25rem 0.45rem 0.75rem;
+  border: 1px solid #d4c5a0;
+  border-radius: 6px;
+  background-color: #faf6f0;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  font-family: "Lato", sans-serif;
+}
+
+.sidebar-search-icon {
+  width: 50px;
+  color: #c87840;
+  pointer-events: none;
+}
+
+.sidebar-search-icon img {
+  display: flex;
+  transform: rotate(45deg);
+}
+
+.sidebar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-list li {
+  margin-bottom: 0.15rem;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.35rem 0;
+  text-decoration: none;
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 400;
+}
+
+/* Highlights the currently viewed/edited recipe in the sidebar */
+.sidebar-link--current {
+  font-weight: 700;
+}
+
+.sidebar-empty {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOME PAGE
+   ═══════════════════════════════════════════════════════════ */
+
+.home {
+  text-align: center;
+  padding-top: 1.5rem;
+}
+
+.home-eyebrow {
+  color: #555252;
+  font-size: 2rem;
+  margin: 0 0 1.5rem;
+}
+
+/* Dashed circle that frames the cookbook illustration */
+.hero-circle {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  overflow: hidden;
+}
+
+.hero-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-title {
+  font-family: "Dancing Script", cursive;
+  color: #1a5f6a;
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+.home-subtitle {
+  color: #555252;
+  font-size: 1rem;
+  margin: 0 0 2.5rem;
+}
+
+.home-actions {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+}
+
+/* Both CTA buttons (Browse Recipes + Add New Recipe) share this style */
+.cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.75rem;
+  background-color: #c8b58a;
+  color: #2c1a0e;
+  border: 2px solid #8b7248;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.cta-btn img {
+  height: 22px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECIPE LIST PAGE  (/recipes)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Top bar: banner image left, search right */
+.recipes-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.recipes-banner {
+  height: 130px;
+  width: auto;
+  border-radius: 8px;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.search-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cf7f5a;
+  border-radius: 6px;
+  border-image-source: url("hand-drawn-stroke.svg");
+  border-image-slice: 30;
+  border-image-repeat: round;
+  background-color: #fbf1e5de;
+  font-size: 0.95rem;
+  width: 280px;
+  font-family: "Lato", sans-serif;
+}
+
+.search-btn {
+  padding: 0.45rem 0.65rem;
+  width: 60px;
+  border: none;
+  background: transparent;
+  cursor: default;
+  color: #c87840;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.search-btn img {
+  width: 100%;
+  transform: rotate(45deg);
+}
+
+.recipe-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.recipe-empty a {
+  color: #c87840;
+  text-decoration: underline;
+}
+
+/* Two-column grid of recipe cards */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* ── Recipe Card ── */
+.recipe-card {
+  border: 1px solid #cf7f5a;
+  border-radius: 8px;
+  padding: 1.25rem;
+  background-color: #fbf5ec;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recipe-card-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+/* Row: circular image + description text side by side */
+.recipe-card-body {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+/* Circular frame for the dish image on a recipe card */
+.recipe-card-image {
+  width: 110px;
+  height: 110px;
+  border: none;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: #f5f0e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recipe-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image-label {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.recipe-card-description {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Four stat boxes in a row */
+.recipe-card-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stat-item-label {
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+  color: #1f2937;
+}
+
+/* Stat value box on recipe cards */
+.card-stat-box {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #d4956a;
+  border-radius: 4px;
+  background-color: #faf6f0;
+  text-align: center;
+  font-size: 0.9rem;
+  min-width: 70px;
+}
+
+.recipe-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Base for all three card action buttons (View, Edit, Delete) */
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  font-family: "Lato", sans-serif;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.card-btn img {
+  height: 15px;
+}
+
+.card-btn--view {
+  background-color: #8b7a5e;
+  color: white;
+  border: 1px solid #6b5a40;
+}
+
+.card-btn--edit {
+  background-color: #c8b58a;
+  color: #2c1a0e;
+  border: 1px solid #8b7248;
+}
+
+.card-btn--delete {
+  background-color: #eca898;
+  color: #2c1a0e;
+  border: 1px solid #c07060;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECIPE DETAIL PAGE  (/recipes/$recipeId)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Three-column grid: sidebar | main content | recipe image */
+.detail-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 220px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.detail-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 900;
+}
+
+.detail-description {
+  color: #4b5563;
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+}
+
+/* Row of four stat boxes */
+.detail-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.detail-stat-label {
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Stat value box on the detail page — slightly larger than card version */
+.detail-stat-box {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #d4956a;
+  border-radius: 4px;
+  background-color: #faf6f0;
+  text-align: center;
+  min-width: 90px;
+  font-size: 1rem;
+}
+
+/* Shared wrapper for Ingredients and Instructions sections */
+.detail-section {
+  margin-top: 2rem;
+}
+
+.detail-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+}
+
+/* Ingredients flow into 3 columns automatically */
+.ingredients-col-list {
+  column-count: 3;
+  column-gap: 2rem;
+  padding-left: 1.2rem;
+  margin: 0;
+}
+
+.ingredients-col-list li {
+  margin-bottom: 0.4rem;
+  break-inside: avoid;
+}
+
+.instructions-list {
+  padding-left: 1.2rem;
+  margin: 0;
+}
+
+.instructions-list li {
+  margin-bottom: 1.5rem;
+}
+
+.instructions-list p {
+  margin: 0.4rem 0 0;
+}
+
+/* Edit / Delete buttons at the bottom of the detail page */
+.detail-actions {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-detail-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  background-color: #5e6b3e;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.btn-detail-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  background-color: #eca898;
+  color: #2c1a0e;
+  border: 1px solid #c07060;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: "Lato", sans-serif;
+}
+
+.btn-detail-edit img,
+.btn-detail-delete img {
+  height: 16px;
+}
+
+.detail-meta {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 1rem;
+}
+
+/* Right column: centres the circular image */
+.detail-image-col {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.detail-image-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: none;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.detail-image-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-image-placeholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px dashed #c4c4c4;
+  background-color: #f5f0e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EDIT PAGE  (/recipes/$recipeId/edit)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Two-column grid: sidebar | form */
+.edit-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECIPE FORM  (add + edit pages)
+   ═══════════════════════════════════════════════════════════ */
+
+.form-title {
+  margin: 0 0 1.75rem;
+  font-size: 1.75rem;
+  font-weight: 900;
+}
+
+/* Two-column form: left (metadata) | right (ingredients + instructions) */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.form-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* <label> wrapper — font-size passed through to browser default label */
+.form-label {
+  font-size: 1rem;
+}
+
+/* Overrides for textarea within form inputs */
+.form-input.form-textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+/* "Choose an Image" heading above the picker */
+.dish-picker-label {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.dish-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Each circular dish image button */
+.dish-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #faf6f03d;
+  border: 3px solid #e0d0ba;
+  box-shadow: none;
+}
+
+/* Highlighted state when this dish is selected */
+.dish-btn--selected {
+  border: 3px solid #c84b1e;
+  box-shadow: 0 0 0 2px rgba(200, 75, 30, 0.25);
+}
+
+.dish-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Four-column grid: Prep Time | Cook Time | Servings | Kcal x serv. */
+.form-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* Ingredients section title */
+.ingredients-section-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Column header row for ingredient inputs */
+.ingredients-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.ingredient-col-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Each ingredient row: Name | Amount | Unit */
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Instructions section header: title left, "+ Add Step" button right */
+.instructions-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.instructions-section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Wrapper for each instruction step textarea */
+.instruction-item {
+  margin-bottom: 0.75rem;
+}
+
+.instruction-step-label {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.2rem;
+}
+
+/* Instruction textarea — taller than default input */
+.form-input.form-instruction {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Cancel + Submit buttons, right-aligned */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NOT FOUND STATE  (shared by detail + edit pages)
+   ═══════════════════════════════════════════════════════════ */
+
+.not-found {
+  text-align: center;
+  padding: 3rem;
+}
+
+.not-found a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* Rough button style */
+
+.rough-button-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+}
+
+.rough-button-container:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.rough-button-container:active {
+  transform: translateY(1px);
+  filter: brightness(0.92);
+}
+
+.rough-button-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.rough-button-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.rough-button-icon img {
+  width: 30px;
+  height: auto;
+  display: block;
+  transform: rotate(10deg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTON HOVER & ACTIVE STATES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Card buttons: View / Edit / Delete */
+.card-btn {
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.card-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.92);
+}
+
+.card-btn:active {
+  transform: translateY(1px);
+  filter: brightness(0.85);
+}
+
+/* Small secondary buttons: "+ Add Ingredient", "+ Add Step" */
+.btn-small {
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.btn-small:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.92);
+}
+
+.btn-small:active {
+  transform: translateY(1px);
+  filter: brightness(0.85);
+}
+
+/* Home page CTA buttons */
+.cta-btn {
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.92);
+}
+
+.cta-btn:active {
+  transform: translateY(1px);
+  filter: brightness(0.85);
+}
+
+/* Detail page Edit / Delete buttons */
+.btn-detail-edit,
+.btn-detail-delete {
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.btn-detail-edit:hover,
+.btn-detail-delete:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.9);
+}
+
+.btn-detail-edit:active,
+.btn-detail-delete:active {
+  transform: translateY(1px);
+  filter: brightness(0.82);
+}
+
+/* Dish image picker buttons */
+.dish-btn {
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.dish-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+.dish-btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INPUT FOCUS STATES
+   ═══════════════════════════════════════════════════════════ */
+
+/* All TextField inputs use canvas redraws for focus (see TextField.tsx).
+   No CSS focus rules needed for them — they would create a double border. */
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH PAGE
+   ═══════════════════════════════════════════════════════════ */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.auth-card {
+  background: white;
+  border: 2px solid #c9a96e;
+  border-radius: 12px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card h1 {
+  font-family: "Dancing Script", cursive;
+  font-size: 2rem;
+  color: #7a5230;
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555252;
+  margin-top: 0.5rem;
+}
+
+.auth-form input {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid #c9a96e;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: "Lato", sans-serif;
+  background: #fffdf7;
+  color: #555252;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #7a5230;
+}
+
+.auth-form button[type="submit"] {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #7a5230;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-form button[type="submit"]:hover {
+  background: #5c3d22;
+}
+
+.auth-form button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+  padding: 0.5rem 0.75rem;
+  background: #fdecea;
+  border-radius: 4px;
+  border-left: 3px solid #c0392b;
+}
+
+.auth-toggle {
+  text-align: center;
+  margin: 1.5rem 0 0;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.auth-toggle button {
+  background: none;
+  border: none;
+  color: #7a5230;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Side-by-side first/last name inputs */
+.auth-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.auth-name-row label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555252;
+  margin-bottom: 0.25rem;
+}
+
+.auth-name-row input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 2px solid #c9a96e;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: "Lato", sans-serif;
+  background: #fffdf7;
+  color: #555252;
+}
+
+.auth-name-row input:focus {
+  outline: none;
+  border-color: #7a5230;
+}
+
+/* Avatar picker */
+.avatar-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555252;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.avatar-picker {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.avatar-option {
+  background: none;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  padding: 3px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.avatar-option img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: block;
+}
+
+.avatar-option:hover {
+  border-color: #c9a96e;
+}
+
+.avatar-option--selected {
+  border-color: #7a5230;
+}
+
+/* ── Visibility toggle in RecipeForm ──────────────────────────────────────── */
+
+.visibility-field {
+  margin-bottom: 0.5rem;
+}
+
+.visibility-toggle {
+  display: flex;
+  gap: 0;
+  border: 2px solid #c9a96e;
+  border-radius: 6px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.visibility-btn {
+  padding: 0.5rem 1.25rem;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  font-family: "Lato", sans-serif;
+  cursor: pointer;
+  color: #888;
+  transition: background 0.15s, color 0.15s;
+}
+
+.visibility-btn:first-child {
+  border-right: 1px solid #c9a96e;
+}
+
+.visibility-btn--active {
+  background: #7a5230;
+  color: white;
+  font-weight: 600;
+}
+
+.visibility-hint {
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0.35rem 0 0;
+}
+
+/* ── Private badge (recipe cards + detail page) ───────────────────────────── */
+
+.private-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  background: #f0e6d3;
+  border: 1px solid #c9a96e;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7a5230;
+  white-space: nowrap;
+}
+
+/* Logout button in the header */
+.logout-btn {
+  background: none;
+  border: 1px solid #c9a96e;
+  color: #7a5230;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #f5e6cc;
+}
