@@ -253,7 +253,7 @@ function RecipeForm({
               <TextField
                 type="number"
                 value={servings}
-                placeholder="e.g. 2"
+                placeholder="e.g. 4"
                 onChange={(e) => setServings(e.target.value)}
                 min="1"
                 className="form-input"

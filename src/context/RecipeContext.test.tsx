@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect } from 'vitest'
+import { useState } from 'react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { RecipeProvider, useRecipes } from './RecipeContext'
 import type { Recipe } from '../types/recipe'
 
@@ -13,8 +14,76 @@ import type { Recipe } from '../types/recipe'
 //   2. Wrap it in the Provider inside render()
 //   3. Drive behavior by clicking buttons in the consumer
 //   4. Assert against what the consumer renders
+
+// ── Firebase mocks ─────────────────────────────────────────────────────────
 //
-// This way we test the REAL context — no mocking required.
+// TESTING CONCEPT: RecipeContext talks to Firebase Firestore. In tests we
+// don't want to hit the real database — it would be slow and read real data.
+//
+// vi.hoisted() creates variables BEFORE imports run (vi.mock is hoisted to
+// the top of the file). This lets the factory functions below close over
+// shared state, and lets beforeEach() reset that state between tests.
+
+const mockState = vi.hoisted(() => ({
+  docs: [] as Array<{ id: string; data: () => Record<string, unknown> }>,
+  notify: null as ((snap: { docs: Array<{ id: string; data: () => Record<string, unknown> }> }) => void) | null,
+}))
+
+vi.mock('../firebase', () => ({ db: {} }))
+
+vi.mock('firebase/firestore', () => ({
+  collection: vi.fn(),
+  query: vi.fn((q: unknown) => q),
+  orderBy: vi.fn(),
+
+  // onSnapshot registers a callback and fires it immediately with current docs.
+  // Returns an unsubscribe function (matches the real Firebase API).
+  onSnapshot: vi.fn((_q: unknown, cb: typeof mockState.notify) => {
+    mockState.notify = cb
+    cb!({ docs: mockState.docs })
+    return () => { mockState.notify = null }
+  }),
+
+  // addDoc stores the recipe and fires the snapshot callback so RecipeContext
+  // sees the update. The recipe object passed at runtime still has its `id`
+  // field even though TypeScript types it as Omit<Recipe, "id">, so we use
+  // that id to make tests predictable.
+  addDoc: vi.fn((_col: unknown, data: Record<string, unknown>) => {
+    const id = (data.id as string) || `mock-id-${mockState.docs.length + 1}`
+    const { id: _omit, ...rest } = data as Record<string, unknown> & { id?: string }
+    mockState.docs.push({ id, data: () => ({ ...rest, createdAt: { toDate: () => new Date() } }) })
+    mockState.notify?.({ docs: mockState.docs })
+    return Promise.resolve({ id })
+  }),
+
+  // updateDoc finds the doc by id, merges in the new data, and fires snapshot.
+  // We preserve the original createdAt (in Firestore Timestamp format) so that
+  // RecipeContext can still call .toDate() on it after the update.
+  updateDoc: vi.fn((ref: { id: string }, data: Record<string, unknown>) => {
+    const idx = mockState.docs.findIndex(d => d.id === ref.id)
+    if (idx !== -1) {
+      const existing = mockState.docs[idx].data()
+      mockState.docs[idx] = { id: ref.id, data: () => ({ ...existing, ...data, createdAt: existing.createdAt }) }
+      mockState.notify?.({ docs: mockState.docs })
+    }
+    return Promise.resolve()
+  }),
+
+  // deleteDoc removes the doc by id and fires snapshot.
+  deleteDoc: vi.fn((ref: { id: string }) => {
+    mockState.docs = mockState.docs.filter(d => d.id !== ref.id)
+    mockState.notify?.({ docs: mockState.docs })
+    return Promise.resolve()
+  }),
+
+  doc: vi.fn((_db: unknown, _col: unknown, id: string) => ({ id })),
+}))
+
+// Each test gets a clean slate — no leftover docs from previous tests.
+beforeEach(() => {
+  mockState.docs = []
+  mockState.notify = null
+})
 
 // ── Shared test data ──────────────────────────────────────────────────────────
 // TESTING CONCEPT: A factory function lets each test get a fresh copy of the
@@ -115,13 +184,17 @@ describe('RecipeContext', () => {
     const user = userEvent.setup()
     const recipe = makeRecipe()
 
+    // TESTING CONCEPT: addRecipe returns the Firestore-generated ID.
+    // We capture it in state so we can use the correct ID for delete —
+    // the same way a real component would.
     function TestConsumer() {
       const { recipes, addRecipe, deleteRecipe } = useRecipes()
+      const [addedId, setAddedId] = useState('')
       return (
         <div>
           <span data-testid="count">{recipes.length}</span>
-          <button onClick={() => addRecipe(recipe)}>Add</button>
-          <button onClick={() => deleteRecipe(recipe.id)}>Delete</button>
+          <button onClick={async () => setAddedId(await addRecipe(recipe))}>Add</button>
+          <button onClick={() => deleteRecipe(addedId)}>Delete</button>
         </div>
       )
     }
@@ -148,14 +221,15 @@ describe('RecipeContext', () => {
 
     function TestConsumer() {
       const { recipes, addRecipe, deleteRecipe } = useRecipes()
+      const [pastaId, setPastaId] = useState('')
       return (
         <div>
           {recipes.map((r) => (
             <div key={r.id}>{r.title}</div>
           ))}
-          <button onClick={() => addRecipe(recipe1)}>Add Pasta</button>
+          <button onClick={async () => setPastaId(await addRecipe(recipe1))}>Add Pasta</button>
           <button onClick={() => addRecipe(recipe2)}>Add Pizza</button>
-          <button onClick={() => deleteRecipe('id-1')}>Delete Pasta</button>
+          <button onClick={() => deleteRecipe(pastaId)}>Delete Pasta</button>
         </div>
       )
     }
@@ -180,15 +254,18 @@ describe('RecipeContext', () => {
     const original = makeRecipe({ title: 'Old Title' })
     const updated = makeRecipe({ title: 'New Title' }) // same id
 
+    // TESTING CONCEPT: We capture the ID returned by addRecipe and use it
+    // for the update — the same way a real component would.
     function TestConsumer() {
       const { recipes, addRecipe, updateRecipe } = useRecipes()
+      const [addedId, setAddedId] = useState('')
       return (
         <div>
           {recipes.map((r) => (
             <div key={r.id}>{r.title}</div>
           ))}
-          <button onClick={() => addRecipe(original)}>Add</button>
-          <button onClick={() => updateRecipe(updated)}>Update</button>
+          <button onClick={async () => setAddedId(await addRecipe(original))}>Add</button>
+          <button onClick={() => updateRecipe({ ...updated, id: addedId })}>Update</button>
         </div>
       )
     }
@@ -216,11 +293,12 @@ describe('RecipeContext', () => {
 
     function TestConsumer() {
       const { recipes, addRecipe, updateRecipe } = useRecipes()
+      const [addedId, setAddedId] = useState('')
       return (
         <div>
           <span data-testid="count">{recipes.length}</span>
-          <button onClick={() => addRecipe(recipe)}>Add</button>
-          <button onClick={() => updateRecipe(updated)}>Update</button>
+          <button onClick={async () => setAddedId(await addRecipe(recipe))}>Add</button>
+          <button onClick={() => updateRecipe({ ...updated, id: addedId })}>Update</button>
         </div>
       )
     }
@@ -242,13 +320,16 @@ describe('RecipeContext', () => {
     const user = userEvent.setup()
     const recipe = makeRecipe({ id: 'my-id', title: 'Lasagne' })
 
+    // TESTING CONCEPT: We capture the returned ID and use it to look up the
+    // recipe — this reflects real usage where you use the Firestore-generated ID.
     function TestConsumer() {
       const { addRecipe, getRecipe } = useRecipes()
-      const found = getRecipe('my-id')
+      const [addedId, setAddedId] = useState('')
+      const found = getRecipe(addedId)
       return (
         <div>
           <span data-testid="found">{found?.title ?? 'not found'}</span>
-          <button onClick={() => addRecipe(recipe)}>Add</button>
+          <button onClick={async () => setAddedId(await addRecipe(recipe))}>Add</button>
         </div>
       )
     }
