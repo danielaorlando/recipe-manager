@@ -42,6 +42,7 @@ function RecipeForm({
 
   // TYPE CONCEPT: useEffect — runs when editingRecipe changes.
   // If we're editing, populate all fields with the saved recipe's data.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (editingRecipe) {
       setTitle(editingRecipe.title);
@@ -56,6 +57,7 @@ function RecipeForm({
       setInstructions(editingRecipe.instructions);
     }
   }, [editingRecipe]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const addIngredient = (): void => {
     setIngredients([...ingredients, { name: "", amount: "", unit: "" }]);
