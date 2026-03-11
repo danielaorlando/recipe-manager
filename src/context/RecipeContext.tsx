@@ -67,7 +67,11 @@ export function RecipeProvider({ children }: { children: React.ReactNode }) {
   // DATABASE CONCEPT: addDoc returns a DocumentReference with the auto-generated id.
   // We return it so the caller can navigate to the new recipe's page.
   const addRecipe = async (recipe: Omit<Recipe, "id">): Promise<string> => {
-    const docRef = await addDoc(collection(db, "recipes"), recipe);
+    // Firestore rejects undefined values — strip them out before saving.
+    const clean = Object.fromEntries(
+      Object.entries(recipe).filter(([, v]) => v !== undefined)
+    );
+    const docRef = await addDoc(collection(db, "recipes"), clean);
     return docRef.id;
   };
 
@@ -75,7 +79,10 @@ export function RecipeProvider({ children }: { children: React.ReactNode }) {
   // new values. Only the fields you pass get changed — others stay the same.
   const updateRecipe = async (recipe: Recipe): Promise<void> => {
     const { id, ...data } = recipe;
-    await updateDoc(doc(db, "recipes", id), data);
+    const clean = Object.fromEntries(
+      Object.entries(data).filter(([, v]) => v !== undefined)
+    );
+    await updateDoc(doc(db, "recipes", id), clean);
   };
 
   // DATABASE CONCEPT: deleteDoc finds the document by id and removes it
